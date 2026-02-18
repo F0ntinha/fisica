@@ -1,57 +1,122 @@
 body{
     margin:0;
-    font-family:Arial;
-    background:linear-gradient(135deg,#141e30,#243b55);
-    color:white;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background:#0f172a;
+    color:#e2e8f0;
+}
+
+/* HEADER */
+
+header{
     text-align:center;
-}
-
-.layout{
-    display:flex;
-    justify-content:space-around;
-    margin-top:20px;
-}
-
-.controls{
-    width:300px;
-    background:#111;
     padding:20px;
-    border-radius:15px;
-    box-shadow:0 0 20px black;
+    border-bottom:1px solid #1e293b;
 }
 
-input{
+h1{
+    margin:0;
+    font-weight:600;
+}
+
+.subtitle{
+    color:#94a3b8;
+    margin-top:5px;
+}
+
+/* LAYOUT PRINCIPAL */
+
+.container{
+    display:flex;
+    gap:30px;
+    padding:30px;
+}
+
+/* PAINEL */
+
+.panel{
+    width:320px;
+    background:#111827;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.4);
+}
+
+.panel h2{
+    margin-top:0;
+}
+
+.control-group{
+    margin-bottom:18px;
+}
+
+.control-group label{
+    font-size:14px;
+    color:#cbd5e1;
+}
+
+.value{
+    font-size:14px;
+    font-weight:bold;
+    margin-top:4px;
+    color:#38bdf8;
+}
+
+input[type="range"]{
     width:100%;
-    margin-bottom:10px;
+    margin-top:5px;
 }
 
 button{
     width:100%;
-    padding:10px;
-    background:#ff2e2e;
+    padding:12px;
+    margin-top:15px;
+    background:#2563eb;
     border:none;
-    color:white;
-    font-weight:bold;
     border-radius:8px;
+    color:white;
+    font-weight:600;
     cursor:pointer;
+    transition:0.2s;
 }
 
-.simArea{
+button:hover{
+    background:#1d4ed8;
+}
+
+.results{
+    margin-top:25px;
+    padding:15px;
+    background:#0b1220;
+    border-radius:8px;
+    font-size:14px;
+}
+
+/* ÁREA DE SIMULAÇÃO */
+
+.simulation-area{
+    flex:1;
     display:flex;
     flex-direction:column;
-    gap:20px;
+    gap:25px;
+}
+
+.sim-card,
+.graph-card{
+    background:#111827;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.4);
+}
+
+.sim-card h3,
+.graph-card h3{
+    margin-top:0;
+    color:#38bdf8;
 }
 
 canvas{
-    background:#1c1c1c;
-    border-radius:15px;
-    box-shadow:0 0 15px black;
+    background:#0b1220;
+    border-radius:8px;
 }
 
-.info{
-    margin-top:10px;
-    background:#222;
-    padding:10px;
-    border-radius:10px;
-}
 

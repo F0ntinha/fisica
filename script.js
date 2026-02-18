@@ -1,155 +1,115 @@
-const g = 9.8;
+const canvas = document.getElementById("simulacao");
+const ctx = canvas.getContext("2d");
 
-const simCanvas = document.getElementById("simCanvas");
-const ctx = simCanvas.getContext("2d");
+canvas.width = window.innerWidth - 300;
+canvas.height = window.innerHeight * 0.65;
 
-const graphCanvas = document.getElementById("graphCanvas");
-const gctx = graphCanvas.getContext("2d");
+let animacao;
+let tempo = 0;
 
-let sliders = ["massa","mu","raio","angulo","vel"];
+const g = 9.81;
 
-sliders.forEach(id=>{
-    document.getElementById(id).addEventListener("input",updateLabels);
+const grafico = new Chart(document.getElementById("grafico"), {
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [{
+      label: "Velocidade (m/s)",
+      data: [],
+      borderWidth: 2,
+      tension: 0.3,
+      pointRadius: 0
+    }]
+  },
+  options: {
+    animation: false,
+    scales: {
+      x: { title: { display: true, text: "Tempo (s)" }},
+      y: { title: { display: true, text: "Velocidade (m/s)" }, beginAtZero: true }
+    }
+  }
 });
 
-function updateLabels(){
-    sliders.forEach(id=>{
-        document.getElementById(id+"Val").innerText =
-        document.getElementById(id).value;
-    });
-}
-updateLabels();
+function iniciar() {
 
-let animation;
-let progress = 0;
-let graphData = [];
+  cancelAnimationFrame(animacao);
+  grafico.data.labels = [];
+  grafico.data.datasets[0].data = [];
+  tempo = 0;
 
-function calcularVmax(R, mu, theta){
+  const m = parseFloat(massa.value);
+  const mu = parseFloat(mu.value);
+  const r = parseFloat(raio.value);
+  const ang = parseFloat(angulo.value) * Math.PI / 180;
+  let v = parseFloat(velocidade.value);
 
-let num = R * g * (Math.sin(theta) + mu * Math.cos(theta));
-let den = (Math.cos(theta) - mu * Math.sin(theta));
+  const vMax = Math.sqrt(r * g * (Math.tan(ang) + mu) / (1 - mu * Math.tan(ang)));
+  vmax.innerText = "Velocidade Máxima: " + vMax.toFixed(2) + " m/s";
 
-if(den <= 0) return 100; // evita divisão inválida
+  function loop() {
 
-return Math.sqrt(num/den);
-}
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-function startSimulation(){
+    desenharPista(ang);
+    desenharCarro(v, r);
+    desenharVetores(m, v, r);
 
-cancelAnimationFrame(animation);
-progress = 0;
-graphData = [];
+    if (v > vMax) {
+      status.innerText = "🚨 Derrapou!";
+      status.style.color = "red";
+    } else {
+      status.innerText = "✅ Estável";
+      status.style.color = "lime";
+    }
 
-let m = parseFloat(massa.value);
-let muVal = parseFloat(mu.value);
-let R = parseFloat(raio.value);
-let theta = parseFloat(angulo.value) * Math.PI/180;
-let v = parseFloat(vel.value);
+    tempo += 0.016;
+    grafico.data.labels.push(tempo.toFixed(2));
+    grafico.data.datasets[0].data.push(v);
+    if (grafico.data.labels.length > 200) {
+      grafico.data.labels.shift();
+      grafico.data.datasets[0].data.shift();
+    }
+    grafico.update();
 
-let vmax = calcularVmax(R, muVal, theta);
-let derrapa = v > vmax;
+    animacao = requestAnimationFrame(loop);
+  }
 
-infoBox.innerHTML =
-"Velocidade Máxima Teórica: " + vmax.toFixed(2) + " m/s<br>" +
-(derrapa ? "❌ Derrapa" : "✅ Completa a curva");
-
-function animate(){
-
-ctx.clearRect(0,0,simCanvas.width,simCanvas.height);
-drawGround();
-
-let scale = 20;
-let cx = simCanvas.width/2;
-let cy = simCanvas.height - 80;
-
-drawTrack(R,theta,cx,cy,scale);
-
-if(progress <= Math.PI/2){
-
-let x = cx + Math.cos(progress)*R*scale;
-let y = cy - Math.sin(progress)*R*scale*Math.cos(theta);
-
-if(derrapa && progress > Math.PI/3){
-    x += progress*40;
+  loop();
 }
 
-drawCar(x,y,progress);
+function desenharPista(angulo) {
 
-progress += v/(R*60);
+  ctx.save();
+  ctx.translate(canvas.width/2, canvas.height/2 + 50);
+  ctx.rotate(-angulo);
 
-// atualizar gráfico em tempo real
-graphData.push({x: progress, y: v});
-drawGraphLive();
+  ctx.beginPath();
+  ctx.arc(0, 0, 200, Math.PI/4, Math.PI);
+  ctx.lineWidth = 40;
+  ctx.strokeStyle = "#444";
+  ctx.stroke();
 
-}else{
-cancelAnimationFrame(animation);
+  ctx.restore();
 }
 
-animation = requestAnimationFrame(animate);
+function desenharCarro(v, r) {
+
+  const x = canvas.width/2 + 150 * Math.cos(tempo);
+  const y = canvas.height/2 + 150 * Math.sin(tempo);
+
+  ctx.fillStyle = "red";
+  ctx.fillRect(x, y, 40, 20);
 }
 
-animate();
+function desenharVetores(m, v, r) {
+
+  const Fc = m * v*v / r;
+
+  ctx.beginPath();
+  ctx.moveTo(100, 100);
+  ctx.lineTo(100 + Fc/50, 100);
+  ctx.strokeStyle = "yellow";
+  ctx.stroke();
+
+  ctx.fillText("Força Centrípeta", 100, 90);
 }
-
-function drawGround(){
-ctx.fillStyle="#2e2e2e";
-ctx.fillRect(0,simCanvas.height-120,simCanvas.width,120);
-}
-
-function drawTrack(R,theta,cx,cy,scale){
-
-ctx.save();
-ctx.translate(cx,cy);
-ctx.rotate(-theta);
-
-ctx.beginPath();
-ctx.arc(0,0,R*scale,Math.PI,Math.PI*1.5);
-ctx.strokeStyle="#aaaaaa";
-ctx.lineWidth=14;
-ctx.stroke();
-
-ctx.restore();
-}
-
-function drawCar(x,y,angle){
-
-ctx.save();
-ctx.translate(x,y);
-ctx.rotate(-angle);
-
-ctx.fillStyle="#e10600";
-ctx.fillRect(-30,-12,60,24);
-
-ctx.fillStyle="black";
-ctx.fillRect(-25,-18,15,8);
-ctx.fillRect(10,-18,15,8);
-ctx.fillRect(-25,10,15,8);
-ctx.fillRect(10,10,15,8);
-
-ctx.restore();
-}
-
-function drawGraphLive(){
-
-gctx.clearRect(0,0,graphCanvas.width,graphCanvas.height);
-
-gctx.beginPath();
-gctx.moveTo(40,160);
-
-graphData.forEach(point=>{
-    let x = 40 + point.x * 100;
-    let y = 160 - point.y * 4;
-    gctx.lineTo(x,y);
-});
-
-gctx.strokeStyle="cyan";
-gctx.lineWidth=2;
-gctx.stroke();
-
-gctx.fillStyle="white";
-gctx.fillText("Velocidade durante a curva",10,20);
-gctx.fillText("Progresso",300,190);
-gctx.fillText("Velocidade",5,100);
-}
-
-startBtn.addEventListener("click",startSimulation);

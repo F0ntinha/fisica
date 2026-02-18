@@ -2,48 +2,81 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<title>Simulação F1 - Banking 3D</title>
+<title>Simulação - Força Normal e Curvas F1</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Força Normal e Curvas na Fórmula 1</h1>
+<header>
+    <h1>Influência da Força Normal nas Curvas</h1>
+    <p class="subtitle">
+        Modelo físico de curva inclinada (banking) na Fórmula 1
+    </p>
+</header>
 
-<div class="layout">
+<div class="container">
 
-<div class="controls">
+    <!-- PAINEL DE CONTROLO -->
+    <aside class="panel">
 
-<h2>Parâmetros</h2>
+        <h2>Parâmetros</h2>
 
-<label>Massa (kg): <span id="massaVal"></span></label>
-<input type="range" id="massa" min="1" max="5" step="0.1" value="1.5">
+        <div class="control-group">
+            <label>Massa (kg)</label>
+            <input type="range" id="massa" min="1" max="5" step="0.1" value="1.5">
+            <div class="value" id="massaVal"></div>
+        </div>
 
-<label>Coeficiente (μ): <span id="muVal"></span></label>
-<input type="range" id="mu" min="0.2" max="1.5" step="0.05" value="0.8">
+        <div class="control-group">
+            <label>Coeficiente de Atrito (μ)</label>
+            <input type="range" id="mu" min="0.2" max="1.5" step="0.05" value="0.8">
+            <div class="value" id="muVal"></div>
+        </div>
 
-<label>Raio (m): <span id="raioVal"></span></label>
-<input type="range" id="raio" min="3" max="10" step="0.5" value="6">
+        <div class="control-group">
+            <label>Raio da Curva (m)</label>
+            <input type="range" id="raio" min="3" max="10" step="0.5" value="6">
+            <div class="value" id="raioVal"></div>
+        </div>
 
-<label>Ângulo Banking (°): <span id="anguloVal"></span></label>
-<input type="range" id="angulo" min="0" max="45" step="1" value="15">
+        <div class="control-group">
+            <label>Ângulo de Inclinação θ (°)</label>
+            <input type="range" id="angulo" min="0" max="45" step="1" value="15">
+            <div class="value" id="anguloVal"></div>
+        </div>
 
-<label>Velocidade Entrada (m/s): <span id="velVal"></span></label>
-<input type="range" id="vel" min="2" max="25" step="0.5" value="12">
+        <div class="control-group">
+            <label>Velocidade de Entrada (m/s)</label>
+            <input type="range" id="vel" min="2" max="25" step="0.5" value="12">
+            <div class="value" id="velVal"></div>
+        </div>
 
-<button id="startBtn">Iniciar Teste</button>
+        <button id="startBtn">Iniciar Simulação</button>
 
-<div class="info" id="infoBox"></div>
+        <div class="results">
+            <h3>Resultados Teóricos</h3>
+            <div id="infoBox"></div>
+        </div>
 
-</div>
+    </aside>
 
-<div class="simArea">
-<canvas id="simCanvas" width="700" height="500"></canvas>
-<canvas id="graphCanvas" width="700" height="200"></canvas>
-</div>
+    <!-- ÁREA DE SIMULAÇÃO -->
+    <main class="simulation-area">
+
+        <div class="sim-card">
+            <h3>Simulação da Curva</h3>
+            <canvas id="simCanvas" width="800" height="500"></canvas>
+        </div>
+
+        <div class="graph-card">
+            <h3>Gráfico em Tempo Real</h3>
+            <canvas id="graphCanvas" width="800" height="220"></canvas>
+        </div>
+
+    </main>
 
 </div>
 
 <script src="script.js"></script>
 </body>
 </html>
-

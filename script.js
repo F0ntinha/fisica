@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-
   const canvas = document.getElementById("simulacao");
   const ctx = canvas.getContext("2d");
   canvas.width = window.innerWidth - 300;
@@ -27,7 +26,9 @@ document.addEventListener("DOMContentLoaded", () => {
         { label: "Aceleração (m/s²)", data: [], borderColor: "#fb5607", borderWidth: 2, tension: 0.3, pointRadius: 0 }
       ]
     },
-    options: { animation: false, responsive: true,
+    options: {
+      animation: false,
+      responsive: true,
       scales: {
         x: { title: { display: true, text: "Tempo (s)" }},
         y: { title: { display: true, text: "Valores" }, beginAtZero: true }
@@ -36,10 +37,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function iniciar() {
-
     cancelAnimationFrame(animacao);
     grafico.data.labels = [];
     grafico.data.datasets.forEach(ds => ds.data = []);
+
     let tempo = 0;
 
     const m = parseFloat(massa.value);
@@ -51,15 +52,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const vMax = Math.sqrt(r * g * (Math.tan(ang) + muVal) / (1 - muVal * Math.tan(ang)));
     vmax.innerText = "Velocidade Máxima: " + vMax.toFixed(2) + " m/s";
 
-    let theta = 0; // posição angular
+    let posX = -r*10; // início da pista
+    let posY = 0;
 
     function loop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       desenharPista(r, ang);
-      desenharCarro(r, theta, ang, v, vMax);
-      desenharVetores(m, v, r, theta, ang);
+      desenharCarro(posX, posY, ang, v, vMax);
+      desenharVetores(m, v, r);
 
-      // Atualiza status
+      // Status
       if (v > vMax) {
         status.innerText = "🚨 Derrapou!";
         status.style.color = "red";
@@ -79,9 +81,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       grafico.update();
 
-      // Física: calcula deslocamento angular
-      theta += v / r * 0.016;
+      // Física do movimento: o carro desliza pela pista
+      posX += v * 0.016 * Math.cos(ang);
+      posY += v * 0.016 * Math.sin(ang);
+
       tempo += 0.016;
+
+      // Chegou ao final da pista
+      if (posX >= r*10) return;
 
       animacao = requestAnimationFrame(loop);
     }
@@ -92,55 +99,46 @@ document.addEventListener("DOMContentLoaded", () => {
   function desenharPista(r, ang) {
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2 + 50);
-    ctx.rotate(-ang); // inclinação visual
+    ctx.rotate(-ang);
 
     ctx.beginPath();
-    ctx.arc(0, 0, r*10, 0, 2*Math.PI);
-    ctx.lineWidth = 10;
+    ctx.moveTo(-r*10, 0);
+    ctx.lineTo(r*10, 0);
+    ctx.lineWidth = 15;
     ctx.strokeStyle = "#444";
     ctx.stroke();
 
     ctx.restore();
   }
 
-  function desenharCarro(r, theta, ang, v, vMax) {
+  function desenharCarro(x, y, ang, v, vMax) {
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2 + 50);
     ctx.rotate(-ang);
-    const x = r*10 * Math.cos(theta);
-    const y = r*10 * Math.sin(theta);
     ctx.fillStyle = v > vMax ? "red" : "lime";
     ctx.fillRect(x-20, y-10, 40, 20);
-
     ctx.fillStyle = "white";
     ctx.font = "14px Arial";
     ctx.fillText(v.toFixed(2) + " m/s", x-20, y-15);
-
     ctx.restore();
   }
 
-  function desenharVetores(m, v, r, theta, ang) {
+  function desenharVetores(m, v, r) {
     const Fc = m * v*v / r;
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2 + 50);
-    ctx.rotate(-ang);
-
     ctx.beginPath();
     ctx.moveTo(0,0);
-    ctx.lineTo(Fc/50, 0);
+    ctx.lineTo(Fc/50, -50);
     ctx.strokeStyle = "yellow";
     ctx.lineWidth = 4;
     ctx.stroke();
     ctx.fillStyle = "yellow";
     ctx.font = "16px Arial";
-    ctx.fillText("Fc", Fc/50 + 5, 5);
-
+    ctx.fillText("Fc", Fc/50 + 5, -55);
     ctx.restore();
   }
 
   iniciarBtn.addEventListener("click", iniciar);
 
 });
-
-
-

@@ -6,8 +6,17 @@ canvas.height = window.innerHeight * 0.65;
 
 let animacao;
 let tempo = 0;
-
 const g = 9.81;
+
+// Seleção de elementos
+const massa = document.getElementById("massa");
+const mu = document.getElementById("mu");
+const raio = document.getElementById("raio");
+const angulo = document.getElementById("angulo");
+const velocidade = document.getElementById("velocidade");
+const vmax = document.getElementById("vmax");
+const status = document.getElementById("status");
+const iniciarBtn = document.getElementById("iniciarBtn");
 
 const grafico = new Chart(document.getElementById("grafico"), {
   type: 'line',
@@ -38,12 +47,12 @@ function iniciar() {
   tempo = 0;
 
   const m = parseFloat(massa.value);
-  const mu = parseFloat(mu.value);
+  const muVal = parseFloat(mu.value);
   const r = parseFloat(raio.value);
   const ang = parseFloat(angulo.value) * Math.PI / 180;
   let v = parseFloat(velocidade.value);
 
-  const vMax = Math.sqrt(r * g * (Math.tan(ang) + mu) / (1 - mu * Math.tan(ang)));
+  const vMax = Math.sqrt(r * g * (Math.tan(ang) + muVal) / (1 - muVal * Math.tan(ang)));
   vmax.innerText = "Velocidade Máxima: " + vMax.toFixed(2) + " m/s";
 
   function loop() {
@@ -78,7 +87,6 @@ function iniciar() {
 }
 
 function desenharPista(angulo) {
-
   ctx.save();
   ctx.translate(canvas.width/2, canvas.height/2 + 50);
   ctx.rotate(-angulo);
@@ -93,7 +101,6 @@ function desenharPista(angulo) {
 }
 
 function desenharCarro(v, r) {
-
   const x = canvas.width/2 + 150 * Math.cos(tempo);
   const y = canvas.height/2 + 150 * Math.sin(tempo);
 
@@ -102,7 +109,6 @@ function desenharCarro(v, r) {
 }
 
 function desenharVetores(m, v, r) {
-
   const Fc = m * v*v / r;
 
   ctx.beginPath();
@@ -111,5 +117,9 @@ function desenharVetores(m, v, r) {
   ctx.strokeStyle = "yellow";
   ctx.stroke();
 
+  ctx.fillStyle = "white";
   ctx.fillText("Força Centrípeta", 100, 90);
 }
+
+// Evento de botão
+iniciarBtn.addEventListener("click", iniciar);

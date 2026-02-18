@@ -15,26 +15,45 @@ document.addEventListener("DOMContentLoaded", () => {
   const iniciarBtn = document.getElementById("iniciarBtn");
 
   let animacao;
-  let tempo = 0;
   const g = 9.81;
 
   const grafico = new Chart(document.getElementById("grafico"), {
     type: 'line',
     data: {
       labels: [],
-      datasets: [{
-        label: "Velocidade (m/s)",
-        data: [],
-        borderWidth: 2,
-        tension: 0.3,
-        pointRadius: 0
-      }]
+      datasets: [
+        {
+          label: "Velocidade (m/s)",
+          data: [],
+          borderColor: "#3a86ff",
+          borderWidth: 2,
+          tension: 0.3,
+          pointRadius: 0
+        },
+        {
+          label: "Força Centrípeta (N)",
+          data: [],
+          borderColor: "#ffbe0b",
+          borderWidth: 2,
+          tension: 0.3,
+          pointRadius: 0
+        },
+        {
+          label: "Aceleração (m/s²)",
+          data: [],
+          borderColor: "#fb5607",
+          borderWidth: 2,
+          tension: 0.3,
+          pointRadius: 0
+        }
+      ]
     },
     options: {
       animation: false,
+      responsive: true,
       scales: {
         x: { title: { display: true, text: "Tempo (s)" }},
-        y: { title: { display: true, text: "Velocidade (m/s)" }, beginAtZero: true }
+        y: { title: { display: true, text: "Valores" }, beginAtZero: true }
       }
     }
   });
@@ -43,8 +62,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     cancelAnimationFrame(animacao);
     grafico.data.labels = [];
-    grafico.data.datasets[0].data = [];
-    tempo = 0;
+    grafico.data.datasets.forEach(ds => ds.data = []);
+    let tempo = 0;
 
     const m = parseFloat(massa.value);
     const muVal = parseFloat(mu.value);
@@ -52,21 +71,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const ang = parseFloat(angulo.value) * Math.PI / 180;
     let v = parseFloat(velocidade.value);
 
-    // Velocidade máxima com atrito na curva
+    // Velocidade máxima na curva considerando atrito
     const vMax = Math.sqrt(r * g * (Math.tan(ang) + muVal) / (1 - muVal * Math.tan(ang)));
     vmax.innerText = "Velocidade Máxima: " + vMax.toFixed(2) + " m/s";
 
-    // Posição angular do carro na pista
+    // Posição angular do carro
     let theta = 0;
 
     function loop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      desenharPista(r, ang);
+      desenharCarro(r, theta, ang, v, vMax);
+      desenharVetores(m, v, r, theta, ang);
 
-      desenharPista(r);
-      desenharCarro(r, theta);
-      desenharVetores(m, v, r);
-
-      // Status
+      // Atualiza status
       if (v > vMax) {
         status.innerText = "🚨 Derrapou!";
         status.style.color = "red";
@@ -76,17 +94,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Atualiza gráfico
-      tempo += 0.016;
       grafico.data.labels.push(tempo.toFixed(2));
       grafico.data.datasets[0].data.push(v);
+      grafico.data.datasets[1].data.push(m * v*v / r);
+      grafico.data.datasets[2].data.push(v*v / r); // aceleração centrípeta
       if (grafico.data.labels.length > 200) {
         grafico.data.labels.shift();
-        grafico.data.datasets[0].data.shift();
+        grafico.data.datasets.forEach(ds => ds.data.shift());
       }
       grafico.update();
 
-      // Atualiza posição angular com velocidade
-      theta += v / r * 0.016;
+      // Atualiza posição angular
+      theta += v / r * 0.016; // Δθ = v/r * Δt
+      tempo += 0.016;
 
       animacao = requestAnimationFrame(loop);
     }
@@ -94,44 +114,55 @@ document.addEventListener("DOMContentLoaded", () => {
     loop();
   }
 
-  function desenharPista(r) {
+  function desenharPista(r, ang) {
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2 + 50);
+    ctx.rotate(-ang); // inclinação da pista
 
     ctx.beginPath();
-    ctx.arc(0, 0, r*10, 0, 2*Math.PI); // escala x10 para caber no canvas
+    ctx.arc(0, 0, r*10, 0, 2*Math.PI);
     ctx.lineWidth = 10;
     ctx.strokeStyle = "#444";
     ctx.stroke();
-
     ctx.restore();
   }
 
-  function desenharCarro(r, theta) {
+  function desenharCarro(r, theta, ang, v, vMax) {
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2 + 50);
+    ctx.rotate(-ang);
     const x = r*10 * Math.cos(theta);
     const y = r*10 * Math.sin(theta);
-    ctx.fillStyle = "red";
+    ctx.fillStyle = v > vMax ? "red" : "lime";
     ctx.fillRect(x - 20, y - 10, 40, 20);
+
+    // Velocidade instantânea acima do carro
+    ctx.fillStyle = "white";
+    ctx.font = "14px Arial";
+    ctx.fillText(v.toFixed(2) + " m/s", x - 20, y - 15);
+
     ctx.restore();
   }
 
-  function desenharVetores(m, v, r) {
+  function desenharVetores(m, v, r, theta, ang) {
     const Fc = m * v*v / r;
     ctx.save();
+    ctx.translate(canvas.width/2, canvas.height/2 + 50);
+    ctx.rotate(-ang);
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo(Fc/50, 0); // vetor centrípeta
+    ctx.strokeStyle = "yellow";
+    ctx.lineWidth = 4;
+    ctx.stroke();
     ctx.fillStyle = "yellow";
     ctx.font = "16px Arial";
-    ctx.beginPath();
-    ctx.moveTo(100, 100);
-    ctx.lineTo(100 + Fc/10, 100);
-    ctx.strokeStyle = "yellow";
-    ctx.stroke();
-    ctx.fillText("Força Centrípeta", 100, 90);
+    ctx.fillText("Fc", Fc/50 + 5, 5);
     ctx.restore();
   }
 
   iniciarBtn.addEventListener("click", iniciar);
 
 });
+
 

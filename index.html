@@ -28,7 +28,7 @@
     <label>Velocidade Inicial (m/s)</label>
     <input type="range" id="velocidade" min="1" max="40" value="15">
 
-    <button onclick="iniciar()">Iniciar Simulação</button>
+    <button id="iniciarBtn">Iniciar Simulação</button>
 
     <div class="resultado">
       <p id="status"></p>
@@ -37,13 +37,10 @@
   </div>
 
   <div class="main">
-
     <canvas id="simulacao"></canvas>
-
     <div class="grafico-container">
       <canvas id="grafico"></canvas>
     </div>
-
   </div>
 
 </div>

@@ -1,19 +1,15 @@
 body{
     margin:0;
-    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
     font-family:Arial;
+    background:linear-gradient(135deg,#141e30,#243b55);
     color:white;
     text-align:center;
 }
 
-h1{
-    margin:20px;
-}
-
-.main{
+.layout{
     display:flex;
     justify-content:space-around;
-    align-items:flex-start;
+    margin-top:20px;
 }
 
 .controls{
@@ -21,7 +17,7 @@ h1{
     background:#111;
     padding:20px;
     border-radius:15px;
-    box-shadow:0 0 15px rgba(0,0,0,0.5);
+    box-shadow:0 0 20px black;
 }
 
 input{
@@ -32,27 +28,28 @@ input{
 button{
     width:100%;
     padding:10px;
-    background:#ff3b3b;
+    background:#ff2e2e;
     border:none;
     color:white;
     font-weight:bold;
     border-radius:8px;
     cursor:pointer;
-    transition:0.3s;
 }
 
-button:hover{
-    background:#ff0000;
+.simArea{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
 }
 
 canvas{
     background:#1c1c1c;
     border-radius:15px;
-    box-shadow:0 0 20px black;
+    box-shadow:0 0 15px black;
 }
 
 .info{
-    margin-top:15px;
+    margin-top:10px;
     background:#222;
     padding:10px;
     border-radius:10px;
